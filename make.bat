@@ -11,7 +11,7 @@ REM sdcc --version
 REM SDCC : mcs51/z80/z180/r2k/r2ka/r3ka/sm83/tlcs90/ez80_z80/z80n/r800/ds390/pic16/pic14/TININative/ds400/hc08/s08/stm8/pdk13/pdk14/pdk15/mos6502/mos65c02/f8 TD- 4.5.1 #15295 (MINGW32)
 REM published under GNU General Public License (GPL)
 set C=sdcc
-set C_FLAGS=-mz80 --asm=asxxxx --std-c23 --disable-warning 110
+set C_FLAGS=-mz80 --asm=asxxxx --std-c23 --disable-warning 110 -I%BASE_DIR%\include
 set C_OPT_FLAGS=--opt-code-speed --allow-undocumented-instructions
 
 REM sdasz80
