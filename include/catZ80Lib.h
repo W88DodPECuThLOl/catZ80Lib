@@ -5,6 +5,7 @@
 
 #if !defined(CAT_Z80_LIB_DISABLE_Z80_FUNCTIONS)
 #include "z80_inp.h"
+#include "z80_decode_LZE.h"
 #include "z80_outp.h"
 #endif // !defined(CAT_Z80_LIB_DISABLE_Z80_FUNCTIONS)
 
@@ -15,6 +16,7 @@
 #endif // !defined(CAT_Z80_LIB_DISABLE_SOS_FUNCTIONS)
 
 #if !defined(CAT_Z80_LIB_DISABLE_X1_FUNCTIONS)
+
 #if !defined(CAT_Z80_LIB_DISABLE_X1_EMM_FUNCTIONS)
 #include "x1_emm0_copyFromEmm0.h"
 #include "x1_emm0_copyToBank0FromEmm0.h"
@@ -23,13 +25,31 @@
 #include "x1_emm0_setEmm0Address.h"
 #endif // !defined(CAT_Z80_LIB_DISABLE_X1_EMM_FUNCTIONS)
 
+#if !defined(CAT_Z80_LIB_DISABLE_X1_CRTC_FUNCTIONS)
+#include "x1_crtc_waitVBlank.h"
+#include "x1_crtc_setPCG.h"
+#endif // !defined(CAT_Z80_LIB_DISABLE_X1_CRTC_FUNCTIONS)
+
+#if !defined(CAT_Z80_LIB_DISABLE_X1_DMA_FUNCTIONS)
+#include "x1_dma_reset.h"
+#include "x1_dma_fillVRAM.h"
+#include "x1_dma_copyMemoryToVRAM.h"
+#include "x1_dma_textClearScreen40.h"
+#include "x1_dma_graphicsClearScreen.h"
+#endif // !defined(CAT_Z80_LIB_DISABLE_X1_DMA_FUNCTIONS)
+
 #if !defined(CAT_Z80_LIB_DISABLE_X1_GRAPHICS_FUNCTIONS)
 #include "x1_gra_setPaletteZ.h"
+#include "x1_gra_setVRAMAccessBank.h"
 #endif // !defined(CAT_Z80_LIB_DISABLE_X1_GRAPHICS_FUNCTIONS)
 
 #if !defined(CAT_Z80_LIB_DISABLE_X1_JOYSTICK_FUNCTIONS)
 #include "x1_joy_readJoyStick.h"
 #endif // !defined(CAT_Z80_LIB_DISABLE_X1_JOYSTICK_FUNCTIONS)
+
+#if !defined(CAT_Z80_LIB_DISABLE_X1_SUBCPU_FUNCTIONS)
+#include "x1_subCpu_gameKeyRead.h"
+#endif // !defined(CAT_Z80_LIB_DISABLE_X1_SUBCPU_FUNCTIONS)
 
 #if !defined(CAT_Z80_LIB_DISABLE_X1_ETC_FUNCTIONS)
 #include "x1_portAddress.h"
