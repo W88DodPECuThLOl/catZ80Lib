@@ -70,8 +70,11 @@
 
 #if !defined(CAT_Z80_LIB_DISABLE_X1_DISK_FUNCTIONS)
 #include "x1_disk_def.h"
+#include "x1_disk_initialize.h"
+#include "x1_disk_mortorOff.h"
 #include "x1_disk_readRecord.h"
 #include "x1_disk_readRecords.h"
+#include "x1_disk_seek.h"
 #include "x1_disk_waitForNotBusy.h"
 #include "x1_disk_waitForReady.h"
 #endif // !defined(CAT_Z80_LIB_DISABLE_X1_DISK_FUNCTIONS)
@@ -83,6 +86,7 @@
 #include "x1_file_getFileInfomationBlock.h"
 #include "x1_file_getFileSize.h"
 #include "x1_file_initialize.h"
+#include "x1_file_normalizeFileName.h"
 #include "x1_file_readFat.h"
 #include "x1_file_readFile.h"
 #include "x1_file_setCurrentDriveNo.h"

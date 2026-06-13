@@ -1,75 +1,43 @@
 #include "x1_file_getFileInfomationBlock.h"
+#include "x1_file_getDriveNoFromFilename.h"
+#include "x1_file_normalizeFileName.h"
+#include "x1_file_enumerateInfomationBlock.h"
 #include "x1_fdc_def.h"
 #include "x1_disk_def.h"
 #include "x1_fs_def.h"
 #include "x1_disk_readRecord.h"
-#include "x1_file_getDriveNoFromFilename.h"
+#include "x1_disk_mortorOff.h"
 
 #include <string.h>
 
-#define END_MARK     (0xFF)
-#define DELETED_MARK (0x00)
-
 static u8
-normalizeFileNames(char* normalizedFilename, const u8* filename)
+compareFilename(const u8* infomationBlock, void* userData1, void* userData2, void* userData3)
 {
-    char* dst = normalizedFilename;
-    char* dstEnd = dst + FILE_SYSTEM_FILE_NAME_LENGTH + FILE_SYSTEM_FILE_EXTENTION_LENGTH;
-    while(dst != dstEnd) {
-        *dst++ = 0x20;
+    if(memcmp(userData1, infomationBlock + 1, FILE_SYSTEM_FILE_NAME_LENGTH+FILE_SYSTEM_FILE_EXTENTION_LENGTH) == 0) {
+        memcpy(userData2, infomationBlock, FILE_SYSTEM_IB_SIZE);
+        *(u8*)userData3 = FILE_SYSTEM_SUCCESS;
+        return 1; // 終了
     }
-    *dst = 0;
-
-    // ドライブ名を飛ばす
-    const char* src = filename;
-    while(*src != 0 && *src != ':') { src++; }
-    if(*src == 0) {
-        // ドライブ名が無かった
-        src = filename;
-    } else {
-        src++;
-    }
-    // ファイル名をコピー
-    dst = normalizedFilename;
-    dstEnd = dst + FILE_SYSTEM_FILE_NAME_LENGTH;
-    while(*src != 0 && *src != '.' && dst != dstEnd) {
-        *dst++ = *src++;
-    }
-    if(*src == '.') {
-        src++;
-    } else if(*src == 0) {
-        return FILE_SYSTEM_SUCCESS;
-    } else if(dst == dstEnd) {
-        return FILE_SYSTEM_ERROR_BAD_FILE_NAME;
-    }
-    // 拡張子をコピー
-    dst = normalizedFilename + FILE_SYSTEM_FILE_NAME_LENGTH;
-    dstEnd = dst + FILE_SYSTEM_FILE_EXTENTION_LENGTH;
-    while(*src != 0 && dst != dstEnd) {
-        *dst++ = *src++;
-    }
-    if(*src != 0) {
-        return FILE_SYSTEM_ERROR_BAD_FILE_NAME;
-    }
-    return FILE_SYSTEM_SUCCESS;
+    return 0; // 継続
 }
 
 u8
-x1_fileGetFileInfomationBlock(const char* filename, u8* infomationBlock)
+x1_fileGetFileInfomationBlock_sub(u8 driveNo, const char* filename, u8* infomationBlock)
 {
-    u8 driveNo;
-    u8 rc = x1_fileGetDriveNoFromFilename(&driveNo, gFileSystemContext.currentDriveNo, filename);
-    if(rc != FILE_SYSTEM_SUCCESS) {
-        return rc;
-    }
-//sos_printf("x1_fileGetDriveNoFromFilename : %d\r", driveNo);
+    // ファイル名をノーマライズ
     char normalizedFilename[FILE_SYSTEM_FILE_NAME_LENGTH+FILE_SYSTEM_FILE_EXTENTION_LENGTH+1];
-    rc = normalizeFileNames(normalizedFilename, filename);
+    u8 rc = x1_fileNormalizeFileName(normalizedFilename, filename);
     if(rc != FILE_SYSTEM_SUCCESS) {
         return rc;
     }
-//sos_printf("normalizeFileNames : %s\r", normalizedFilename);
 
+    u8 result = FILE_SYSTEM_ERROR_FILE_NOT_FOUND;
+    rc = x1_fileEnumerateInfomationBlock(driveNo, compareFilename, normalizedFilename, infomationBlock, &result);
+    if(rc != FILE_SYSTEM_SUCCESS) {
+        return rc;
+    }
+    return result;
+#if 0
     // IBを検索する
     u32 recordNo = FILE_SYSTEM_IB_RECORD_NO;
     u32 endRecordNo = FILE_SYSTEM_IB_RECORD_NO + 16;
@@ -85,11 +53,11 @@ x1_fileGetFileInfomationBlock(const char* filename, u8* infomationBlock)
         u8* ib = ibBuffer;
         for(u8 i = 0; i < (DISK_SECTOR_SIZE / FILE_SYSTEM_IB_SIZE); ++i) {
 
-            if(ib[0] == END_MARK) {
+            if(ib[0] == X1_FILE_FAT_END_MARK) {
                 // 最後まで検索した
                 return FILE_SYSTEM_ERROR_FILE_NOT_FOUND;
             }
-            if(ib[0] != DELETED_MARK) {
+            if(ib[0] != X1_FILE_FAT_DELETED_MARK) {
                 if(memcmp(normalizedFilename, ib + 1, FILE_SYSTEM_FILE_NAME_LENGTH+FILE_SYSTEM_FILE_EXTENTION_LENGTH) == 0) {
                     memcpy(infomationBlock, ib, FILE_SYSTEM_IB_SIZE);
                     return FILE_SYSTEM_SUCCESS;
@@ -99,4 +67,23 @@ x1_fileGetFileInfomationBlock(const char* filename, u8* infomationBlock)
         }
     }
     return FILE_SYSTEM_ERROR_FILE_NOT_FOUND;
+#endif
+}
+
+u8
+x1_fileGetFileInfomationBlock(const char* filename, u8* infomationBlock)
+{
+    // ファイル名からドライブ番号を取得
+    u8 driveNo;
+    u8 rc = x1_fileGetDriveNoFromFilename(&driveNo, gFileSystemContext.currentDriveNo, filename);
+    if(rc != FILE_SYSTEM_SUCCESS) {
+        return rc;
+    }
+
+    // IBを取得
+    rc = x1_fileGetFileInfomationBlock_sub(driveNo, filename, infomationBlock);
+
+    // ドライブのモーターを切っておく
+    x1_diskMortorOff(driveNo);
+    return rc;
 }

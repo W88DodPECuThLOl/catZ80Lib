@@ -3,7 +3,12 @@
 #include "z80_inp.h"
 
 const u8
-x1_fdcStatus()
+x1_fdcStatus() __naked
 {
-    return inp(FDC_PORT_STR);
+    //return inp(FDC_PORT_STR);
+    __asm
+    ld bc,#FDC_PORT_STR
+    in a,(c)
+    ret
+    __endasm;
 }

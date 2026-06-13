@@ -2,9 +2,10 @@
 #include "x1_fdc_def.h"
 #include "x1_fs_def.h"
 #include "x1_disk_readRecords.h"
+#include "x1_disk_mortorOff.h"
 
 u8
-x1_fileReadFat(const u8 driveNo)
+x1_fileReadFat_sub(const u8 driveNo)
 {
     if(driveNo >= 4) {
         return FILE_SYSTEM_ERROR_INVALID_DRIVE_NO;
@@ -26,4 +27,12 @@ x1_fileReadFat(const u8 driveNo)
         return FILE_SYSTEM_ERROR_READ;
     }
     return FILE_SYSTEM_SUCCESS;
+}
+
+u8
+x1_fileReadFat(const u8 driveNo)
+{
+    u8 state = x1_fileReadFat_sub(driveNo);
+    x1_diskMortorOff(driveNo);
+    return state;
 }

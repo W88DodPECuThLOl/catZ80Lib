@@ -1,5 +1,6 @@
 #include "x1_file_initialize.h"
 #include "x1_fs_def.h"
+#include "x1_disk_initialize.h"
 
 FileSystemContext gFileSystemContext;
 
@@ -9,6 +10,7 @@ x1_fileInitialize(u8* fatBuffer, u8* readWriteBuffer)
     if(fatBuffer == (u8*)0 || readWriteBuffer == (u8*)0) {
         return FILE_SYSTEM_ERROR;
     }
+    x1_diskInitialize();
     gFileSystemContext.readWriteBuffer = readWriteBuffer;
     gFileSystemContext.fatBuffer = fatBuffer;
     gFileSystemContext.currentDriveNo = 0;

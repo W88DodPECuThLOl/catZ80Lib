@@ -14,7 +14,7 @@ x1_fdcReadData(u8* data, const u8 sectorNo) __naked
     push de
     push af
 
-    ; セクターを設定
+    ; 読み込むセクターを設定
     push hl
         ld   bc, #FDC_PORT_SCR
         out  (c), e
