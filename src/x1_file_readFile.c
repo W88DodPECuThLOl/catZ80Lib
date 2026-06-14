@@ -59,7 +59,7 @@ x1_fileReadFile(const char* filename, u8* buffer)
             const u8 recoredSize = dataSize / DISK_SECTOR_SIZE;
             if(recoredSize > 0) {
                 // 纏めて読めるのは読み込む
-                u8 state = x1_diskReadRecords(buffer, driveNo, recordNo, recoredSize - 1);
+                u8 state = x1_diskReadRecords(buffer, driveNo, recordNo, recoredSize);
                 if(state & (FDC_STATUS_TYPE23_NOT_READY | FDC_STATUS_TYPE23_RECORD_NOT_FOUND | FDC_STATUS_TYPE23_CRC_ERROR | FDC_STATUS_TYPE23_BUSY)) {
                     return FILE_SYSTEM_ERROR_READ;
                 }
